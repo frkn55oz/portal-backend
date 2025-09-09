@@ -15,11 +15,31 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 
-// CORS ayarları - Frontend URL'nizi buraya yazın
+// CORS ayarları - Production ve development
+const allowedOrigins = [
+  'http://localhost:5174',  // Development
+  'https://localhost:5174', // Development HTTPS
+  process.env.FRONTEND_URL, // Production
+  'https://portalvizedanismanlik.com', // GoDaddy domain (GERÇEK DOMAIN'İNİ YAZ)
+  'https://portalvizedanismanlik.com'   // HTTP fallback
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Development için
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 
 // Rate limiting - Brute force koruması
