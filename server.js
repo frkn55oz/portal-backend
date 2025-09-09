@@ -66,9 +66,10 @@ if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
-// Middleware: JWT token doğrulama
+// Middleware: JWT token doğrulama (Header tabanlı)
 const authenticateToken = (req, res, next) => {
-  const token = req.cookies.admin_token;
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
   
   if (!token) {
     return res.status(401).json({
@@ -138,17 +139,10 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
       { expiresIn: '2h' }
     );
 
-    // HttpOnly cookie set et
-    res.cookie('admin_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS'de true
-      sameSite: 'strict',
-      maxAge: 2 * 60 * 60 * 1000 // 2 saat
-    });
-
+    // Token'ı response'da gönder (cookie yerine)
     res.json({
       success: true,
-      token: 'HttpOnly cookie set',
+      token: token,
       expiresIn: 7200
     });
 
@@ -223,10 +217,9 @@ app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
   }
 });
 
-// Logout endpoint
+// Logout endpoint (Token tabanlı - client'da token silinir)
 app.post('/api/admin/logout', (req, res) => {
   console.log('🚪 Logout from IP:', req.ip);
-  res.clearCookie('admin_token');
   res.json({ 
     success: true,
     message: 'Başarıyla çıkış yapıldı'
