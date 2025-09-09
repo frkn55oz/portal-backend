@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
+const crypto = require('crypto-js');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -94,7 +94,7 @@ app.post('/api/admin/login', loginLimiter, async (req, res) => {
 
     // Şifre kontrolü - ilk giriş için plain text, sonra hash
     const isValid = adminPasswordHash ? 
-      await bcrypt.compare(password, adminPasswordHash) : 
+      crypto.SHA256(password).toString() === adminPasswordHash : 
       password === 'portal2024';
     
     if (!isValid) {
@@ -155,7 +155,7 @@ app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
 
     // Mevcut şifre kontrolü - ilk giriş için plain text, sonra hash
     const isCurrentValid = adminPasswordHash ? 
-      await bcrypt.compare(currentPassword, adminPasswordHash) : 
+      crypto.SHA256(currentPassword).toString() === adminPasswordHash : 
       currentPassword === 'portal2024';
     if (!isCurrentValid) {
       console.log('❌ Wrong current password from IP:', req.ip);
@@ -180,8 +180,8 @@ app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
       });
     }
 
-    // Yeni şifreyi hashle (bcrypt round 12 - güvenli)
-    const newHash = await bcrypt.hash(newPassword, 12);
+    // Yeni şifreyi hashle (SHA256 - güvenli)
+    const newHash = crypto.SHA256(newPassword).toString();
     adminPasswordHash = newHash;
 
     console.log('✅ Password changed successfully from IP:', req.ip);

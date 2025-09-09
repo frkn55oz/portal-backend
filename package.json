@@ -8,18 +8,24 @@
     "dev": "nodemon server.js",
     "test": "echo \"Backend API health check\" && curl http://localhost:3001/api/health"
   },
-  "keywords": ["portal", "admin", "backend", "api", "authentication"],
+  "keywords": [
+    "portal",
+    "admin",
+    "backend",
+    "api",
+    "authentication"
+  ],
   "author": "Portal Yurt Dışı Eğitim",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
-    "bcrypt": "^5.1.1",
-    "jsonwebtoken": "^9.0.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5",
     "cookie-parser": "^1.4.6",
-    "dotenv": "^16.3.1"
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
