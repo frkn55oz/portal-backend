@@ -59,7 +59,7 @@ const loginLimiter = rateLimit({
 
 // Varsayılan admin şifresi hash'i (portal2024)
 // ⚠️ Production'da mutlaka değiştirin!
-let adminPasswordHash = null; // İlk giriş için plain text kontrol
+let adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || null; // Environment variable'dan oku
 
 console.log('🔐 Default admin password: portal2024 (Mutlaka değiştirin!)');
 
@@ -98,7 +98,8 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     success: true, 
     message: 'Portal Backend API çalışıyor',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    passwordStatus: adminPasswordHash ? 'Özel şifre set edilmiş' : 'Varsayılan şifre (portal2024)'
   });
 });
 
@@ -201,7 +202,11 @@ app.post('/api/admin/change-password', authenticateToken, async (req, res) => {
     const newHash = crypto.SHA256(newPassword).toString();
     adminPasswordHash = newHash;
 
+    // ⚠️ ÖNEMLİ: Render'da kalıcılık için Environment Variable güncellenmelidir!
     console.log('✅ Password changed successfully from IP:', req.ip);
+    console.log('⚠️  RENDER UYARISI: Deploy sonrası şifre sıfırlanır!');
+    console.log('📝 Yeni hash (Render Environment Variables\'a ekle):');
+    console.log('   ADMIN_PASSWORD_HASH=' + newHash);
 
     // Tüm oturumları sonlandır (yeniden giriş zorunlu)
     res.clearCookie('admin_token');
