@@ -10,6 +10,9 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust proxy - Render için gerekli (reverse proxy desteği)
+app.set('trust proxy', 1);
+
 // Güvenlik middleware
 app.use(helmet());
 app.use(cookieParser());
